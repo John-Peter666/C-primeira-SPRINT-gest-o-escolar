@@ -1,6 +1,11 @@
 ﻿
 
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Globalization;
+
 namespace ProjetoEscola.Menu;
 
 public class MenuSistema
@@ -23,65 +28,70 @@ public class MenuSistema
         while (executando)
         {
             Console.Clear();
+
             Console.ForegroundColor = ConsoleColor.Blue;
-
             Console.WriteLine("===== SISTEMA ESCOLAR =====\n");
-
             Console.ResetColor();
 
-            Console.WriteLine("===== MENU =====");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("1 - Ver dados dos professores");
-            Console.WriteLine("2 - Ver dados dos alunos");
+
+            Console.WriteLine("1 - Ver professores");
+            Console.WriteLine("2 - Ver alunos");
             Console.WriteLine("3 - Adicionar professor");
-            Console.WriteLine("4 - Adicionar nota para aluno");
+            Console.WriteLine("4 - Remover professor");
+            Console.WriteLine("5 - Adicionar aluno");
+            Console.WriteLine("6 - Remover aluno");
+            Console.WriteLine("7 - Adicionar nota");
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("0 - Sair");
 
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write("\nEscolha uma opção: ");
+            Console.Write("\nEscolha: ");
 
-            string opcao = Console.ReadLine()!;
-            Console.Clear();
+            string opcao = Console.ReadLine();
 
             switch (opcao)
             {
                 case "1":
-
                     foreach (var professor in _professores)
                     {
                         professor.ApresentarDados();
                         professor.ApresentarDisciplinas();
-
-                        Console.WriteLine("\n---------------------------\n");
+                        Console.WriteLine("-----------------------");
                     }
-
                     Pausar();
                     break;
 
                 case "2":
-
                     MostrarAlunos();
                     break;
 
                 case "3":
-
                     AdicionarProfessor();
                     break;
 
                 case "4":
+                    RemoverProfessor();
+                    break;
 
+                case "5":
+                    AdicionarAluno();
+                    break;
+
+                case "6":
+                    RemoverAluno();
+                    break;
+
+                case "7":
                     AdicionarNota();
                     break;
 
                 case "0":
-
                     executando = false;
                     break;
 
                 default:
-
                     Console.WriteLine("Opção inválida!");
                     Pausar();
                     break;
@@ -91,53 +101,34 @@ public class MenuSistema
 
     private void MostrarAlunos()
     {
-        bool escolhendoTurma = true;
+        Console.Clear();
 
-        while (escolhendoTurma)
+        Console.WriteLine("1 - Turma A");
+        Console.WriteLine("2 - Turma B");
+
+        string escolha = Console.ReadLine();
+
+        List<Alunos> turma = null;
+
+        if (escolha == "1") turma = _turmaA;
+        if (escolha == "2") turma = _turmaB;
+
+        if (turma == null)
         {
-            Console.Clear();
-
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("===== SELEÇÃO DE TURMA =====");
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("1 - Turma A");
-            Console.WriteLine("2 - Turma B");
-            Console.WriteLine("0 - Voltar");
-
-            Console.Write("\nEscolha: ");
-
-            string escolhaTurma = Console.ReadLine();
-
-            List<Alunos> turmaSelecionada = null;
-
-            if (escolhaTurma == "1")
-                turmaSelecionada = _turmaA;
-
-            else if (escolhaTurma == "2")
-                turmaSelecionada = _turmaB;
-
-            else if (escolhaTurma == "0")
-                return;
-
-            if (turmaSelecionada != null)
-            {
-                Console.Clear();
-
-                foreach (var aluno in turmaSelecionada)
-                {
-                    aluno.ApresentarDados();
-                    Console.WriteLine();
-                }
-
-                Pausar();
-            }
-            else
-            {
-                Console.WriteLine("Opção inválida.");
-                Console.ReadKey();
-            }
+            Console.WriteLine("Turma inválida!");
+            Pausar();
+            return;
         }
+
+        Console.Clear();
+
+        foreach (var aluno in turma)
+        {
+            aluno.ApresentarDados();
+            Console.WriteLine();
+        }
+
+        Pausar();
     }
 
     private void AdicionarProfessor()
@@ -146,13 +137,12 @@ public class MenuSistema
 
         Professores novoProfessor = new Professores();
 
-        Console.Write("Nome do professor: ");
+        Console.Write("Nome: ");
         novoProfessor.Nome = Console.ReadLine();
 
-        // CPF (apenas números)
         while (true)
         {
-            Console.Write("CPF (apenas números): ");
+            Console.Write("CPF (11 números): ");
             string cpf = Console.ReadLine();
 
             if (cpf.All(char.IsDigit) && cpf.Length == 11)
@@ -161,51 +151,46 @@ public class MenuSistema
                 break;
             }
 
-            Console.WriteLine("CPF inválido! Digite apenas 11 números.");
+            Console.WriteLine("CPF inválido!");
         }
 
-        // Data de nascimento
         while (true)
         {
-            Console.Write("Data de nascimento (dd/mm/aaaa): ");
+            Console.Write("Data nascimento (dd/mm/aaaa): ");
             string data = Console.ReadLine();
 
-            if (DateTime.TryParse(data, out DateTime dataConvertida))
+            if (DateTime.TryParseExact(data, "dd/MM/yyyy", null,
+                DateTimeStyles.None, out DateTime dataConvertida))
             {
                 novoProfessor.DataDeNascimento = data;
                 break;
             }
 
-            Console.WriteLine("Data inválida!");
+            Console.WriteLine("Formato inválido!");
         }
 
-        // Salário
         while (true)
         {
             Console.Write("Salário: ");
             string salario = Console.ReadLine();
 
-            if (double.TryParse(salario, out double valor))
+            if (salario.All(char.IsDigit))
             {
                 novoProfessor.Salario = salario;
                 break;
             }
 
-            Console.WriteLine("Digite um valor válido!");
+            Console.WriteLine("Digite apenas números!");
         }
 
-        // Disciplinas
-        Console.Write("Disciplina do professor: ");
+        Console.Write("Disciplina: ");
         string disciplina = Console.ReadLine();
         novoProfessor.Disciplinas.Add(disciplina);
 
-        // Turmas
-        Console.WriteLine("\nQuais turmas ele ensina?");
-
+        Console.WriteLine("\nTurmas que ensina:");
         Console.WriteLine("1 - Turma A");
         Console.WriteLine("2 - Turma B");
 
-        Console.Write("Escolha (ex: 1,2): ");
         string turmas = Console.ReadLine();
 
         if (turmas.Contains("1"))
@@ -216,62 +201,200 @@ public class MenuSistema
 
         _professores.Add(novoProfessor);
 
-        Console.WriteLine("\nProfessor adicionado com sucesso!");
+        Console.WriteLine("\nProfessor adicionado!");
+        Pausar();
+    }
+
+    private void RemoverProfessor()
+    {
+        Console.Clear();
+
+        if (_professores.Count == 0)
+        {
+            Console.WriteLine("Nenhum professor cadastrado.");
+            Pausar();
+            return;
+        }
+
+        for (int i = 0; i < _professores.Count; i++)
+        {
+            Console.WriteLine($"{i} - {_professores[i].Nome}");
+        }
+
+        Console.Write("\nEscolha: ");
+
+        if (int.TryParse(Console.ReadLine(), out int escolha) &&
+            escolha >= 0 && escolha < _professores.Count)
+        {
+            _professores.RemoveAt(escolha);
+            Console.WriteLine("Professor removido!");
+        }
+        else
+        {
+            Console.WriteLine("Opção inválida!");
+        }
 
         Pausar();
     }
 
-
-    private void AdicionarNota()
+    private void AdicionarAluno()
     {
         Console.Clear();
 
-        Console.WriteLine("Escolha a turma:");
+        Console.WriteLine("Escolha turma:");
         Console.WriteLine("1 - Turma A");
         Console.WriteLine("2 - Turma B");
 
-        string escolhaTurma = Console.ReadLine();
+        string escolha = Console.ReadLine();
 
-        List<Alunos> turmaSelecionada = null;
+        List<Alunos> turma = null;
 
-        if (escolhaTurma == "1")
-            turmaSelecionada = _turmaA;
+        if (escolha == "1") turma = _turmaA;
+        if (escolha == "2") turma = _turmaB;
 
-        else if (escolhaTurma == "2")
-            turmaSelecionada = _turmaB;
-
-        if (turmaSelecionada == null)
+        if (turma == null)
         {
             Console.WriteLine("Turma inválida!");
             Pausar();
             return;
         }
 
-        Console.Clear();
+        Alunos novoAluno = new Alunos();
 
-        Console.WriteLine("Escolha o aluno:\n");
+        Console.Write("Nome: ");
+        novoAluno.Nome = Console.ReadLine();
 
-        for (int i = 0; i < turmaSelecionada.Count; i++)
+        while (true)
         {
-            Console.WriteLine($"{i} - {turmaSelecionada[i].Nome}");
+            Console.Write("Matrícula: ");
+            string matricula = Console.ReadLine();
+
+            if (matricula.All(char.IsDigit))
+            {
+                novoAluno.Matricula = matricula;
+                break;
+            }
+
+            Console.WriteLine("Digite apenas números!");
         }
 
-        Console.Write("\nNúmero do aluno: ");
-        int escolhaAluno = int.Parse(Console.ReadLine());
+        while (true)
+        {
+            Console.Write("Data nascimento (dd/mm/aaaa): ");
+            string data = Console.ReadLine();
 
-        Console.Write("Digite a nota: ");
-        double nota = double.Parse(Console.ReadLine());
+            if (DateTime.TryParseExact(data, "dd/MM/yyyy", null,
+                DateTimeStyles.None, out DateTime dataConvertida))
+            {
+                novoAluno.DataDeNascimento = data;
+                break;
+            }
 
-        turmaSelecionada[escolhaAluno].Notas.Add(nota);
+            Console.WriteLine("Formato inválido!");
+        }
 
-        Console.WriteLine("\nNota adicionada com sucesso!");
+        turma.Add(novoAluno);
+
+        Console.WriteLine("Aluno adicionado!");
+        Pausar();
+    }
+
+    private void RemoverAluno()
+    {
+        Console.Clear();
+
+        Console.WriteLine("1 - Turma A");
+        Console.WriteLine("2 - Turma B");
+
+        string escolha = Console.ReadLine();
+
+        List<Alunos> turma = null;
+
+        if (escolha == "1") turma = _turmaA;
+        if (escolha == "2") turma = _turmaB;
+
+        if (turma == null)
+        {
+            Console.WriteLine("Turma inválida!");
+            Pausar();
+            return;
+        }
+
+        for (int i = 0; i < turma.Count; i++)
+        {
+            Console.WriteLine($"{i} - {turma[i].Nome}");
+        }
+
+        Console.Write("\nEscolha: ");
+
+        if (int.TryParse(Console.ReadLine(), out int aluno) &&
+            aluno >= 0 && aluno < turma.Count)
+        {
+            turma.RemoveAt(aluno);
+            Console.WriteLine("Aluno removido!");
+        }
+        else
+        {
+            Console.WriteLine("Opção inválida!");
+        }
+
+        Pausar();
+    }
+
+    private void AdicionarNota()
+    {
+        Console.Clear();
+
+        Console.WriteLine("1 - Turma A");
+        Console.WriteLine("2 - Turma B");
+
+        string escolha = Console.ReadLine();
+
+        List<Alunos> turma = null;
+
+        if (escolha == "1") turma = _turmaA;
+        if (escolha == "2") turma = _turmaB;
+
+        if (turma == null)
+        {
+            Console.WriteLine("Turma inválida!");
+            Pausar();
+            return;
+        }
+
+        for (int i = 0; i < turma.Count; i++)
+        {
+            Console.WriteLine($"{i} - {turma[i].Nome}");
+        }
+
+        Console.Write("\nEscolha aluno: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int aluno) ||
+            aluno < 0 || aluno >= turma.Count)
+        {
+            Console.WriteLine("Aluno inválido!");
+            Pausar();
+            return;
+        }
+
+        Console.Write("Nota: ");
+
+        if (double.TryParse(Console.ReadLine(), out double nota))
+        {
+            turma[aluno].Notas.Add(nota);
+            Console.WriteLine("Nota adicionada!");
+        }
+        else
+        {
+            Console.WriteLine("Nota inválida!");
+        }
 
         Pausar();
     }
 
     private void Pausar()
     {
-        Console.WriteLine("\nPressione qualquer tecla para continuar...");
+        Console.WriteLine("\nPressione qualquer tecla...");
         Console.ReadKey();
     }
 }
