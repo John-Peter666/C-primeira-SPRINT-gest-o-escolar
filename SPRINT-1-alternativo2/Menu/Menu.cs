@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 
 namespace ProjetoEscola.Menu;
 
@@ -27,6 +28,7 @@ public class MenuSistema
         while (executando)
         {
             Console.Clear();
+
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("===== SISTEMA ESCOLAR =====\n");
             Console.ResetColor();
@@ -56,7 +58,7 @@ public class MenuSistema
                     {
                         professor.ApresentarDados();
                         professor.ApresentarDisciplinas();
-                        Console.WriteLine("----------------------");
+                        Console.WriteLine("-----------------------");
                     }
                     Pausar();
                     break;
@@ -90,7 +92,7 @@ public class MenuSistema
                     break;
 
                 default:
-                    Console.WriteLine("Opção inválida");
+                    Console.WriteLine("Opção inválida!");
                     Pausar();
                     break;
             }
@@ -113,10 +115,12 @@ public class MenuSistema
 
         if (turma == null)
         {
-            Console.WriteLine("Turma inválida");
+            Console.WriteLine("Turma inválida!");
             Pausar();
             return;
         }
+
+        Console.Clear();
 
         foreach (var aluno in turma)
         {
@@ -133,8 +137,19 @@ public class MenuSistema
 
         Professores novoProfessor = new Professores();
 
-        Console.Write("Nome: ");
-        novoProfessor.Nome = Console.ReadLine();
+        while (true)
+        {
+            Console.Write("Nome do professor: ");
+            string nome = Console.ReadLine();
+
+            if (nome.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+            {
+                novoProfessor.Nome = nome;
+                break;
+            }
+
+            Console.WriteLine("Digite apenas letras!");
+        }
 
         while (true)
         {
@@ -147,21 +162,22 @@ public class MenuSistema
                 break;
             }
 
-            Console.WriteLine("CPF inválido");
+            Console.WriteLine("CPF inválido!");
         }
 
         while (true)
         {
-            Console.Write("Data nascimento (ddmmaaaa): ");
+            Console.Write("Data nascimento (dd/mm/aaaa): ");
             string data = Console.ReadLine();
 
-            if (data.All(char.IsDigit) && data.Length == 8)
+            if (DateTime.TryParseExact(data, "dd/MM/yyyy", null,
+                DateTimeStyles.None, out DateTime dataConvertida))
             {
                 novoProfessor.DataDeNascimento = data;
                 break;
             }
 
-            Console.WriteLine("Digite apenas números");
+            Console.WriteLine("Formato inválido!");
         }
 
         while (true)
@@ -175,14 +191,14 @@ public class MenuSistema
                 break;
             }
 
-            Console.WriteLine("Digite apenas números");
+            Console.WriteLine("Digite apenas números!");
         }
 
         Console.Write("Disciplina: ");
         string disciplina = Console.ReadLine();
         novoProfessor.Disciplinas.Add(disciplina);
 
-        Console.WriteLine("Turmas que ensina:");
+        Console.WriteLine("\nTurmas que ensina:");
         Console.WriteLine("1 - Turma A");
         Console.WriteLine("2 - Turma B");
 
@@ -196,7 +212,7 @@ public class MenuSistema
 
         _professores.Add(novoProfessor);
 
-        Console.WriteLine("Professor adicionado!");
+        Console.WriteLine("\nProfessor adicionado!");
         Pausar();
     }
 
@@ -204,17 +220,31 @@ public class MenuSistema
     {
         Console.Clear();
 
+        if (_professores.Count == 0)
+        {
+            Console.WriteLine("Nenhum professor cadastrado.");
+            Pausar();
+            return;
+        }
+
         for (int i = 0; i < _professores.Count; i++)
         {
             Console.WriteLine($"{i} - {_professores[i].Nome}");
         }
 
-        Console.Write("Escolha o número: ");
-        int escolha = int.Parse(Console.ReadLine());
+        Console.Write("\nEscolha: ");
 
-        _professores.RemoveAt(escolha);
+        if (int.TryParse(Console.ReadLine(), out int escolha) &&
+            escolha >= 0 && escolha < _professores.Count)
+        {
+            _professores.RemoveAt(escolha);
+            Console.WriteLine("Professor removido!");
+        }
+        else
+        {
+            Console.WriteLine("Opção inválida!");
+        }
 
-        Console.WriteLine("Professor removido!");
         Pausar();
     }
 
@@ -222,7 +252,7 @@ public class MenuSistema
     {
         Console.Clear();
 
-        Console.WriteLine("Escolha a turma");
+        Console.WriteLine("Escolha turma:");
         Console.WriteLine("1 - Turma A");
         Console.WriteLine("2 - Turma B");
 
@@ -235,15 +265,26 @@ public class MenuSistema
 
         if (turma == null)
         {
-            Console.WriteLine("Turma inválida");
+            Console.WriteLine("Turma inválida!");
             Pausar();
             return;
         }
 
         Alunos novoAluno = new Alunos();
 
-        Console.Write("Nome: ");
-        novoAluno.Nome = Console.ReadLine();
+        while (true)
+        {
+            Console.Write("Nome do aluno: ");
+            string nome = Console.ReadLine();
+
+            if (nome.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+            {
+                novoAluno.Nome = nome;
+                break;
+            }
+
+            Console.WriteLine("Digite apenas letras!");
+        }
 
         while (true)
         {
@@ -256,21 +297,22 @@ public class MenuSistema
                 break;
             }
 
-            Console.WriteLine("Digite apenas números");
+            Console.WriteLine("Digite apenas números!");
         }
 
         while (true)
         {
-            Console.Write("Data nascimento (ddmmaaaa): ");
+            Console.Write("Data nascimento (dd/mm/aaaa): ");
             string data = Console.ReadLine();
 
-            if (data.All(char.IsDigit) && data.Length == 8)
+            if (DateTime.TryParseExact(data, "dd/MM/yyyy", null,
+                DateTimeStyles.None, out DateTime dataConvertida))
             {
                 novoAluno.DataDeNascimento = data;
                 break;
             }
 
-            Console.WriteLine("Digite apenas números");
+            Console.WriteLine("Formato inválido!");
         }
 
         turma.Add(novoAluno);
@@ -295,7 +337,7 @@ public class MenuSistema
 
         if (turma == null)
         {
-            Console.WriteLine("Turma inválida");
+            Console.WriteLine("Turma inválida!");
             Pausar();
             return;
         }
@@ -305,12 +347,19 @@ public class MenuSistema
             Console.WriteLine($"{i} - {turma[i].Nome}");
         }
 
-        Console.Write("Escolha o aluno: ");
-        int aluno = int.Parse(Console.ReadLine());
+        Console.Write("\nEscolha: ");
 
-        turma.RemoveAt(aluno);
+        if (int.TryParse(Console.ReadLine(), out int aluno) &&
+            aluno >= 0 && aluno < turma.Count)
+        {
+            turma.RemoveAt(aluno);
+            Console.WriteLine("Aluno removido!");
+        }
+        else
+        {
+            Console.WriteLine("Opção inválida!");
+        }
 
-        Console.WriteLine("Aluno removido!");
         Pausar();
     }
 
@@ -330,7 +379,7 @@ public class MenuSistema
 
         if (turma == null)
         {
-            Console.WriteLine("Turma inválida");
+            Console.WriteLine("Turma inválida!");
             Pausar();
             return;
         }
@@ -340,15 +389,28 @@ public class MenuSistema
             Console.WriteLine($"{i} - {turma[i].Nome}");
         }
 
-        Console.Write("Escolha aluno: ");
-        int aluno = int.Parse(Console.ReadLine());
+        Console.Write("\nEscolha aluno: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int aluno) ||
+            aluno < 0 || aluno >= turma.Count)
+        {
+            Console.WriteLine("Aluno inválido!");
+            Pausar();
+            return;
+        }
 
         Console.Write("Nota: ");
-        double nota = double.Parse(Console.ReadLine());
 
-        turma[aluno].Notas.Add(nota);
+        if (double.TryParse(Console.ReadLine(), out double nota))
+        {
+            turma[aluno].Notas.Add(nota);
+            Console.WriteLine("Nota adicionada!");
+        }
+        else
+        {
+            Console.WriteLine("Nota inválida!");
+        }
 
-        Console.WriteLine("Nota adicionada!");
         Pausar();
     }
 
@@ -358,3 +420,4 @@ public class MenuSistema
         Console.ReadKey();
     }
 }
+
